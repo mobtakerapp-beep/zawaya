@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>صيّاد الزوايا - لعبة البالونات</title>
+<style>
+:root{--ink:#17345c;--blue:#58b9f3;--pink:#ff78ad;--yellow:#ffd45c;--green:#70d6a2;--purple:#a88bff}
+*{box-sizing:border-box}
+body{margin:0;font-family:Tahoma,Arial,sans-serif;color:var(--ink);background:linear-gradient(145deg,#e7f7ff,#fff0f7 55%,#fff8df);min-height:100vh}
+.wrap{max-width:1050px;margin:auto;padding:18px}
+header{text-align:center;padding:12px 8px}
+h1{font-size:clamp(28px,5vw,46px);margin:5px 0;color:#1559a5;text-shadow:0 3px 0 #fff}
+.sub{font-size:17px;color:#52708f}
+.stats{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:14px auto}
+.stat{background:#fff;border:2px solid #d8edff;border-radius:18px;padding:10px 18px;font-weight:bold;box-shadow:0 5px 14px #6aa6c522}
+.stat span{color:#e14e91;font-size:21px}
+.panel{background:#ffffffdf;border:2px solid #d8edff;border-radius:25px;padding:18px;box-shadow:0 12px 30px #5589b51c}
+.question{font-size:clamp(20px,3vw,27px);font-weight:bold;text-align:center;line-height:1.6;min-height:82px;display:flex;align-items:center;justify-content:center}
+.hint{text-align:center;color:#68809a;margin:0 0 10px}
+.balloon-area{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;align-items:end;min-height:240px;padding:12px 4px}
+.balloon{border:0;cursor:pointer;position:relative;min-height:160px;border-radius:50% 50% 46% 46%;color:#18345b;font-size:clamp(17px,2.5vw,22px);font-weight:bold;padding:18px 8px 28px;box-shadow:inset -10px -12px 0 #0000000c,inset 8px 8px 0 #ffffff70,0 9px 16px #45617b25;transition:transform .18s,filter .18s;animation:float 2.4s ease-in-out infinite}
+.balloon:nth-child(2){animation-delay:.25s}.balloon:nth-child(3){animation-delay:.5s}.balloon:nth-child(4){animation-delay:.75s}
+.balloon:after{content:"";position:absolute;bottom:-13px;left:50%;transform:translateX(-50%);border-left:8px solid transparent;border-right:8px solid transparent;border-top:14px solid currentColor;filter:brightness(.92)}
+.balloon:before{content:"";position:absolute;width:2px;height:38px;background:#9aaec3;bottom:-49px;left:50%}
+.balloon:hover{transform:translateY(-9px) scale(1.03);filter:saturate(1.15)}
+.balloon:disabled{cursor:default;opacity:.8}
+.b1{background:linear-gradient(135deg,#ffb2ce,#ff77a8);color:#a52f65}.b2{background:linear-gradient(135deg,#a9e5ff,#65c6f4);color:#17659a}.b3{background:linear-gradient(135deg,#fff0a6,#ffd15b);color:#93600a}.b4{background:linear-gradient(135deg,#c8b8ff,#9b83f4);color:#4d3897}
+.feedback{text-align:center;font-size:20px;font-weight:bold;min-height:36px;margin:8px}
+.actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:12px}
+button.action{border:0;border-radius:15px;padding:13px 24px;font-size:17px;font-weight:bold;cursor:pointer;background:#1769b5;color:white;box-shadow:0 5px 0 #104c86}
+button.action.secondary{background:#ff83b2;box-shadow:0 5px 0 #d65386}
+button.action:disabled{opacity:.45;cursor:not-allowed}
+.progress{height:12px;background:#e7f0f8;border-radius:20px;overflow:hidden;margin:12px 0}
+.bar{height:100%;width:0;background:linear-gradient(90deg,#62c9f4,#a88bff,#ff83b2);transition:width .3s}
+.start,.end{text-align:center;padding:28px 14px}
+.start h2,.end h2{color:#1559a5;font-size:28px}
+.start p,.end p{font-size:18px;line-height:1.8}
+.hidden{display:none}
+.small{font-size:14px;color:#71859a;text-align:center;margin-top:15px}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@media(max-width:620px){.balloon-area{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;min-height:350px}.balloon{min-height:135px}.question{min-height:100px}.wrap{padding:10px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>🎈 صيّاد الزوايا 🎈</h1>
+  <div class="sub">لعبة البالونات التعليمية | الصف الأول الإعدادي</div>
+</header>
+<div class="stats">
+  <div class="stat">⭐ النقاط: <span id="score">0</span></div>
+  <div class="stat">🏁 السؤال: <span id="number">0</span> / 10</div>
+  <div class="stat">⏱️ الوقت: <span id="time">60</span> ثانية</div>
+</div>
+<div class="progress"><div class="bar" id="bar"></div></div>
+<section class="panel start" id="start">
+  <h2>مستعد تصطاد الإجابات الصحيحة؟</h2>
+  <p>اقرأ السؤال جيدًا، ثم اضغط على البالون الذي يحمل الإجابة الصحيحة.<br>كل إجابة صحيحة = 10 نقاط! 🏆</p>
+  <button class="action" onclick="beginGame()">ابدأ اللعب 🚀</button>
+</section>
+<section class="panel hidden" id="game">
+  <div class="question" id="question"></div>
+  <p class="hint">اختار البالون الصحيح واضغط عليه 🎯</p>
+  <div class="balloon-area" id="balloons"></div>
+  <div class="feedback" id="feedback" aria-live="polite"></div>
+  <div class="actions">
+    <button class="action" id="next" onclick="nextQuestion()" disabled>السؤال التالي ←</button>
+  </div>
+</section>
+<section class="panel end hidden" id="end">
+  <h2 id="endTitle">أحسنت يا بطل! 🏆</h2>
+  <p id="endText"></p>
+  <button class="action secondary" onclick="restartGame()">العب من جديد 🔄</button>
+</section>
+<div class="small">إعداد تعليمي تفاعلي – قياس الزوايا والعلاقات بين الزوايا</div>
+</div>
+<script>
+const questions=[
+ {q:"ما قياس الزاوية القائمة؟",a:["45°","90°","120°","180°"],c:1,why:"الزاوية القائمة قياسها 90 درجة."},
+ {q:"الزاوية التي قياسها 35° تُسمى زاوية...",a:["حادة","قائمة","منفرجة","مستقيمة"],c:0,why:"لأن 35° أقل من 90° فهي زاوية حادة."},
+ {q:"ما قياس الزاوية المستقيمة؟",a:["90°","120°","180°","360°"],c:2,why:"الزاوية المستقيمة قياسها 180 درجة."},
+ {q:"زاويتان مجموع قياسيهما 90° تسميان...",a:["متكاملتين","متتامتين","متقابلتين","متجاورتين"],c:1,why:"الزاويتان المتتامتان مجموعهما 90 درجة."},
+ {q:"زاويتان قياساهما 110° و70° تكونان...",a:["متتامتين","متكاملتين","متساويتين","قائمتين"],c:1,why:"110° + 70° = 180°، إذن هما متكاملتان."},
+ {q:"إذا تقاطع مستقيمان، فإن الزاويتين المتقابلتين بالرأس...",a:["مجموعهما 90°","متساويتان","مجموعهما 360°","غير متساويتين دائمًا"],c:1,why:"الزاويتان المتقابلتان بالرأس متساويتان في القياس."},
+ {q:"زاوية قياسها 125° تُسمى زاوية...",a:["حادة","قائمة","منفرجة","مستقيمة"],c:2,why:"لأن 125° أكبر من 90° وأقل من 180° فهي منفرجة."},
+ {q:"إذا كانت زاويتان متتامتين وإحداهما 25°، فما قياس الأخرى؟",a:["65°","75°","155°","25°"],c:0,why:"90° − 25° = 65°."},
+ {q:"إذا كانت زاويتان متكاملتين وإحداهما 135°، فما قياس الأخرى؟",a:["35°","45°","55°","65°"],c:1,why:"180° − 135° = 45°."},
+ {q:"الزاويتان المتجاورتان تشتركان في...",a:["قياس متساوٍ دائمًا","رأس وضلع","ضلعين فقط","لا شيء"],c:1,why:"الزاويتان المتجاورتان لهما رأس مشترك وضلع مشترك."}
+];
+let order=[],idx=0,score=0,time=60,timer=null,locked=false;
+const $=id=>document.getElementById(id);
+function shuffle(arr){return [...arr].sort(()=>Math.random()-.5)}
+function beginGame(){
+ $("start").classList.add("hidden");$("end").classList.add("hidden");$("game").classList.remove("hidden");
+ order=shuffle(questions);idx=0;score=0;time=60;updateStats();loadQuestion();
+ clearInterval(timer);timer=setInterval(()=>{time--; $("time").textContent=time;if(time<=0)finish(true)},1000);
+}
+function updateStats(){$("score").textContent=score;$("number").textContent=Math.min(idx+1,10);$("time").textContent=time;$("bar").style.width=(idx/10*100)+"%"}
+function loadQuestion(){
+ locked=false;$("feedback").textContent="";$("next").disabled=true;
+ const item=order[idx];$("question").textContent=item.q;
+ $("balloons").innerHTML="";
+ const colors=["b1","b2","b3","b4"];
+ item.a.forEach((answer,i)=>{
+  const b=document.createElement("button");b.className="balloon "+colors[i];b.textContent=answer;
+  b.setAttribute("aria-label","اختيار "+answer);b.onclick=()=>choose(i,b);$("balloons").appendChild(b);
+ });
+ updateStats();
+}
+function choose(i,btn){
+ if(locked)return;locked=true;
+ const item=order[idx];const buttons=[...$("balloons").children];
+ buttons.forEach((b,j)=>{b.disabled=true;if(j===item.c){b.style.outline="5px solid #45bd82";b.style.outlineOffset="2px"}});
+ if(i===item.c){score+=10;$("feedback").textContent="🎉 أحسنت! إجابة صحيحة. "+item.why;$("feedback").style.color="#15945e"}
+ else{$("feedback").textContent="💡 حاول مرة أخرى في السؤال القادم. "+item.why;$("feedback").style.color="#c34d78";btn.style.filter="grayscale(.5)"}
+ $("score").textContent=score;$("next").disabled=false;$("next").textContent=idx===9?"عرض النتيجة 🏆":"السؤال التالي ←";
+}
+function nextQuestion(){if(!locked)return;idx++;if(idx>=10){finish(false);return}loadQuestion()}
+function finish(outOfTime){
+ clearInterval(timer);$("game").classList.add("hidden");$("end").classList.remove("hidden");$("bar").style.width="100%";
+ const correct=score/10;
+ $("endTitle").textContent=correct>=8?"🏆 بطل الزوايا!":correct>=5?"👏 أحسنت المحاولة!":"🌟 استمر في التدريب!";
+ $("endText").innerHTML=(outOfTime?"انتهى الوقت!<br>":"انتهت اللعبة!<br>")+"حصلت على <b>"+score+"</b> من 100 نقطة، وأجبت إجابة صحيحة عن <b>"+correct+"</b> من 10 أسئلة.<br>"+(correct>=8?"مستواك رائع، واصل التألق!":"راجع العلاقات بين الزوايا وحاول مرة أخرى!") ;
+}
+function restartGame(){beginGame()}
+</script>
+</body>
+</html>
