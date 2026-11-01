@@ -1,0 +1,12 @@
+{
+  "name": "صيّاد الزوايا - لعبة البالونات",
+  "short_name": "صيّاد الزوايا",
+  "description": "لعبة تعليمية تفاعلية عن قياس الزوايا والعلاقات بينها",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#e7f7ff",
+  "theme_color": "#58b9f3"
+}
