@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>صيّاد الزوايا - لعبة البالونات</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <meta name="theme-color" content="#e7f7ff">
+
 <style>
 :root{--ink:#17345c;--blue:#58b9f3;--pink:#ff78ad;--yellow:#ffd45c;--green:#70d6a2;--purple:#a88bff}
 *{box-sizing:border-box}
@@ -125,5 +128,17 @@ function finish(outOfTime){
 }
 function restartGame(){beginGame()}
 </script>
+
+<script>
+/* تسجيل التخزين المحلي لتشغيل اللعبة بعد أول زيارة متصلة بالإنترنت */
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js")
+      .then(() => console.log("تم تجهيز اللعبة للعمل دون إنترنت"))
+      .catch((error) => console.error("تعذر تفعيل وضع عدم الاتصال:", error));
+  });
+}
+</script>
+
 </body>
 </html>
